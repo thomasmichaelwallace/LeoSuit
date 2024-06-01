@@ -13,6 +13,21 @@ TIMEOUT = 8
 
 class LeoSuit(app.App):
 
+    def set_colour(self, json):
+        try:
+            print("setting", json)
+            requests.post(URL, json=json, timeout=TIMEOUT)
+            self.colour['r'] = json['r']
+            self.colour['g'] = json['g']
+            self.colour['b'] = json['b']
+            print("successfully updated")
+            return True
+        except Exception as e:
+            print("failed to put colour", e)
+            return False
+        
+
+
     def refresh(self):
         self.t += 1
         if self.t > 25:
@@ -20,7 +35,6 @@ class LeoSuit(app.App):
             try:
                 self.error = None
                 r = requests.get(URL, timeout=TIMEOUT)
-                # r.raise_for_status()
                 json = r.json()
                 print("got", json)
                 if json['r']:
@@ -31,8 +45,8 @@ class LeoSuit(app.App):
                     self.colour["b"] = json['b']
             except Exception as e:
                 print("failed to get colour", e)    
-                self.error = e
-            print("refreshinged", self.colour)
+                # self.error = e
+            print("refreshed", self.colour)
 
     def __init__(self):
         self.colour = { "r": 0, "g": 0, "b": 0}
@@ -78,18 +92,8 @@ class LeoSuit(app.App):
 
         if data["r"] != self.colour["r"] or data["g"] != self.colour["g"] or data["b"] != self.colour["b"]:
             print("putting", self.colour, "to", data)
-            try:
-                self.error = None
-                self.colour['r'] = data['r']
-                self.colour['g'] = data['g']
-                self.colour['b'] = data['b']
-                print("successfully updated")
-                requests.post(URL, json=data, timeout=TIMEOUT)
-                # r.raise_for_status()
-                self.error = None
-            except Exception as e:
-                print("failed to put colour", e)
-                self.error = e
+            while not self.set_colour(data):
+                pass
 
     def draw(self, ctx):
         self.d += 1
@@ -98,9 +102,9 @@ class LeoSuit(app.App):
         dots = ""
         for _ in range(0, math.floor(self.d / 12) % 3 + 1):
             dots += "."
-        ctx.rgb(255, 255, 255).move_to(-110,-25).text("roygbiVW " + dots)
-        if self.error is not None:
-            ctx.rgb(255, 255, 255).move_to(-120,0).text(repr(self.error))
-        ctx.rgb(255, 255, 255).move_to(-110,25).text("" + str(self.colour['r']) + "/" + str(self.colour['g']) + "/" + str(self.colour['b']))
+        ctx.rgb(255, 255, 255).move_to(-110,-15).text("roygbiVW " + dots)
+        # if self.error is not None:
+        #     ctx.rgb(255, 255, 255).move_to(-120,0).text(repr(self.error))
+        ctx.rgb(255, 255, 255).move_to(-110,15).text("" + str(self.colour['r']) + "/" + str(self.colour['g']) + "/" + str(self.colour['b']))
 
 __app_export__ = LeoSuit
