@@ -1,3 +1,4 @@
+import math
 import app
 import requests
 
@@ -7,22 +8,42 @@ from events.input import Buttons, BUTTON_TYPES
 from tildagonos import tildagonos
 from system.patterndisplay.events import PatternDisable
 
-URL = "https://roygbivw.hecknswell.com/colour/"
+URL = "http://roygbivw.hecknswell.com/colour/"
+TIMEOUT = 8
 
 class LeoSuit(app.App):
+
+    def refresh(self):
+        self.t += 1
+        if self.t > 25:
+            self.t = 0
+            try:
+                self.error = None
+                r = requests.get(URL, timeout=TIMEOUT)
+                # r.raise_for_status()
+                json = r.json()
+                print("got", json)
+                if json['r']:
+                    self.colour["r"] = json['r']
+                if json['g']:
+                    self.colour["g"] = json['g']
+                if json['b']:
+                    self.colour["b"] = json['b']
+            except Exception as e:
+                print("failed to get colour", e)    
+                self.error = e
+            print("refreshinged", self.colour)
+
     def __init__(self):
-        eventbus.emit(PatternDisable())
-        self.button_states = Buttons(self)
         self.colour = { "r": 0, "g": 0, "b": 0}
-        try:
-            r = requests.get(URL)
-            r.raise_for_status()
-            self.colour = r.json()
-        except Exception as e:
-            print("failed to get colour", e)
-        print("init", self.colour)
+        self.t = 0
+        self.d = 0
+        self.error = None
+        self.button_states = Buttons(self)
+        eventbus.emit(PatternDisable())
 
     def update(self, delta):
+        self.refresh()
         # force leds to change every time
         tildagonos.leds[2] = (255, 0, 0)
         tildagonos.leds[3] = (255, 0, 0)
@@ -37,7 +58,11 @@ class LeoSuit(app.App):
         tildagonos.leds[4] = (255, 0, 255)
         tildagonos.leds[5] = (255, 0, 255)
         # get colour matching button led
-        data = self.colour
+        data = {
+            "r": self.colour["r"],
+            "g": self.colour["g"],
+            "b": self.colour["b"]
+        }
         if self.button_states.get(BUTTON_TYPES["RIGHT"]):
             data = { "r": 255, "g": 0, "b": 0}
         elif self.button_states.get(BUTTON_TYPES["LEFT"]):
@@ -54,17 +79,28 @@ class LeoSuit(app.App):
         if data["r"] != self.colour["r"] or data["g"] != self.colour["g"] or data["b"] != self.colour["b"]:
             print("putting", self.colour, "to", data)
             try:
-                r = requests.post(URL, json=data)
-                r.raise_for_status()
-                self.colour = data
+                self.error = None
+                self.colour['r'] = data['r']
+                self.colour['g'] = data['g']
+                self.colour['b'] = data['b']
                 print("successfully updated")
+                requests.post(URL, json=data, timeout=TIMEOUT)
+                # r.raise_for_status()
+                self.error = None
             except Exception as e:
                 print("failed to put colour", e)
+                self.error = e
 
     def draw(self, ctx):
-        clear_background(ctx)
-        print("drawing", self.colour)
-        ctx.rgb(self.colour['r'], self.colour['g'], self.colour['b'])
-        ctx.rectangle(-150, -150, 300, 300).fill()
+        self.d += 1
+        print("drawing", self.colour, self.d, self.error)
+        ctx.rgb(self.colour['r'], self.colour['g'], self.colour['b']).move_to(-0,0).rectangle(-120, -120, 120*2, 120*2).fill()
+        dots = ""
+        for _ in range(0, math.floor(self.d / 12) % 3 + 1):
+            dots += "."
+        ctx.rgb(255, 255, 255).move_to(-110,-25).text("roygbiVW " + dots)
+        if self.error is not None:
+            ctx.rgb(255, 255, 255).move_to(-120,0).text(repr(self.error))
+        ctx.rgb(255, 255, 255).move_to(-110,25).text("" + str(self.colour['r']) + "/" + str(self.colour['g']) + "/" + str(self.colour['b']))
 
 __app_export__ = LeoSuit

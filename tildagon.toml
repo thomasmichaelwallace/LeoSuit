@@ -1,6 +1,6 @@
 [app]
 # The name of your app as displayed in the menu
-name = "Leo's Suit"
+name = "roygbiVW"
 
 # The submenu where your app should appear.
 # One of: "Badge", "Music", "Media", "Apps", "Games"
@@ -31,10 +31,10 @@ license = "MIT"
 url = "https://github.com/thomasmichaelwallace/leos-suit"
 
 # Description of your app.  Maximum 140 characters!
-description = "Control Leo's van (and later suit)!"
+description = "Control the roygbiVW LED van!"
 
 # Version number of your app.  If you push a commit where this number is
 # increased, we interpret this as a new version being released.
 #
 # Version number must be an integer!
-version = "0.0.4"
+version = "0.0.5"
