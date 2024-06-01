@@ -54,7 +54,7 @@ class LeoSuit(app.App):
         if data["r"] != self.colour["r"] or data["g"] != self.colour["g"] or data["b"] != self.colour["b"]:
             print("putting", self.colour, "to", data)
             try:
-                r = requests.post(URL, json=self.colour)
+                r = requests.post(URL, json=data)
                 r.raise_for_status()
                 self.colour = data
                 print("successfully updated")
