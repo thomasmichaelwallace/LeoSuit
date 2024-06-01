@@ -63,6 +63,7 @@ class LeoSuit(app.App):
 
     def draw(self, ctx):
         clear_background(ctx)
+        print("drawing", self.colour)
         ctx.rgb(self.colour['r'], self.colour['g'], self.colour['b'])
         ctx.rectangle(-150, -150, 300, 300).fill()
 

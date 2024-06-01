@@ -37,4 +37,4 @@ description = "Control Leo's van (and later suit)!"
 # increased, we interpret this as a new version being released.
 #
 # Version number must be an integer!
-version = "0.0.2"
+version = "0.0.4"
