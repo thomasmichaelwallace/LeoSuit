@@ -18,14 +18,14 @@ category = "Apps"
 
 [entry]
 # The name of your entry point `Application` class
-# class = "NickApp"
+class = "LeoSuit"
 
 [metadata]
 # Your nickname.  Must be at most 32 characters!
 author = "thomasmichaelwallace"
 
 # License of your app as an SPDX identifier: <https://spdx.org/licenses/>
-license = "LGPL-3.0-only"
+license = "MIT"
 
 # URL to the repository of your app.
 url = "https://github.com/thomasmichaelwallace/leos-suit"
@@ -37,4 +37,4 @@ description = "Control Leo's van (and later suit)!"
 # increased, we interpret this as a new version being released.
 #
 # Version number must be an integer!
-version = "0.0.1"
+version = "0.0.2"

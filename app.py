@@ -13,10 +13,17 @@ class LeoSuit(app.App):
     def __init__(self):
         eventbus.emit(PatternDisable())
         self.button_states = Buttons(self)
-        self.colour = requests.get(URL).json()
+        self.colour = { "r": 0, "g": 0, "b": 0}
+        try:
+            r = requests.get(URL)
+            r.raise_for_status()
+            self.colour = r.json()
+        except Exception as e:
+            print("failed to get colour", e)
         print("init", self.colour)
 
     def update(self, delta):
+        # force leds to change every time
         tildagonos.leds[2] = (255, 0, 0)
         tildagonos.leds[3] = (255, 0, 0)
         tildagonos.leds[8] = (0, 255, 0)
@@ -29,6 +36,7 @@ class LeoSuit(app.App):
         tildagonos.leds[11] = (0, 255, 255)
         tildagonos.leds[4] = (255, 0, 255)
         tildagonos.leds[5] = (255, 0, 255)
+        # get colour matching button led
         data = self.colour
         if self.button_states.get(BUTTON_TYPES["RIGHT"]):
             data = { "r": 255, "g": 0, "b": 0}
@@ -45,9 +53,13 @@ class LeoSuit(app.App):
 
         if data["r"] != self.colour["r"] or data["g"] != self.colour["g"] or data["b"] != self.colour["b"]:
             print("putting", self.colour, "to", data)
-            self.colour = data
-            requests.post(URL, json=self.colour)
-            print("put!")
+            try:
+                r = requests.post(URL, json=self.colour)
+                r.raise_for_status()
+                self.colour = data
+                print("successfully updated")
+            except Exception as e:
+                print("failed to put colour", e)
 
     def draw(self, ctx):
         clear_background(ctx)
